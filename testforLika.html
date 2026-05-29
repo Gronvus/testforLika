@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0053)file:///C:/Users/ermol/Downloads/angelina-quiz_6.html -->
+<!-- saved from url=(0053)file:///C:/Users/ermol/Downloads/angelina-quiz_9.html -->
 <html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -376,11 +376,10 @@ function toggleOption(idx, btn) {
 
 function nextQuestion() {
   const q = questions[currentQ];
-  // Average score of selected options
   const avgScore = selectedIndexes.reduce((sum, i) => sum + q.options[i].score, 0) / selectedIndexes.length;
   totalScore += avgScore;
   answers.push(Math.round(avgScore));
-  answerIndexes.push(selectedIndexes[0]); // store first for summary
+  answerIndexes.push([...selectedIndexes]); // store ALL selected indexes
   currentQ++;
   if (currentQ < questions.length) { showQuestion(currentQ); } else { showLoading(); }
 }
@@ -456,8 +455,9 @@ function sendResults() {
   // Build readable answers list
   const answerLines = answers.map((score, i) => {
     const q = questions[i];
-    const chosen = q.options[answerIndexes[i]];
-    return (i+1) + '. ' + q.text + '\n   → ' + chosen.emoji + ' ' + chosen.text;
+    const idxs = Array.isArray(answerIndexes[i]) ? answerIndexes[i] : [answerIndexes[i]];
+    const chosen = idxs.map(idx => q.options[idx].emoji + ' ' + q.options[idx].text).join(', ');
+    return (i+1) + '. ' + q.text + '\n   → ' + chosen;
   }).join('\n\n');
 
   const pct = Math.min(98, Math.max(72, Math.round((totalScore / (questions.length * 3)) * 100)));
