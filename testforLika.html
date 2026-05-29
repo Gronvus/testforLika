@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0053)file:///C:/Users/ermol/Downloads/angelina-quiz_5.html -->
+<!-- saved from url=(0053)file:///C:/Users/ermol/Downloads/angelina-quiz_6.html -->
 <html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Тест для Лики 💅</title>
-<link href="./Тест для Лики 💅_files/css2" rel="stylesheet">
+<link href="./testforLika_files/css2" rel="stylesheet">
 <style>
   :root {
     --pink: #F4A7B9;
@@ -82,6 +82,9 @@
   }
   .option:hover { border-color: var(--pink); background: var(--pink-light); }
   .option.selected { border-color: var(--pink-deep); background: #FDE8EE; color: var(--pink-deep); }
+  .option.selected::after { content: '✓'; margin-left: auto; font-weight: 700; color: var(--pink-deep); }
+  .option { justify-content: flex-start; }
+  .next-btn-wrap { text-align: center; margin-top: 1rem; }
   .option-emoji { font-size: 1.2rem; flex-shrink: 0; }
 
   .result-hero { text-align: center; padding: 2rem 0; }
@@ -163,6 +166,9 @@
       <p class="question-sub" id="q-sub"></p>
     </div>
     <div class="options" id="options-container"></div>
+    <div class="next-btn-wrap" id="next-btn-wrap" style="display:none;">
+      <button class="btn" id="next-btn" onclick="nextQuestion()" style="margin-top:0.5rem;">Далее →</button>
+    </div>
   </div>
 
   <!-- ЭКРАН 3: ЗАГРУЗКА -->
@@ -332,10 +338,12 @@ const questions = [
 ];
 
 let currentQ = 0, totalScore = 0, answers = [], answerIndexes = [];
+let selectedIndexes = []; // multi-select per question
 
 function startQuiz() { showScreen('screen-quiz'); showQuestion(0); }
 
 function showQuestion(idx) {
+  selectedIndexes = [];
   const q = questions[idx];
   document.getElementById('q-counter').textContent = (idx+1) + ' / ' + questions.length;
   document.getElementById('progress-fill').style.width = (((idx+1)/questions.length)*100) + '%';
@@ -348,21 +356,33 @@ function showQuestion(idx) {
     const btn = document.createElement('button');
     btn.className = 'option';
     btn.innerHTML = '<span class="option-emoji">' + opt.emoji + '</span>' + opt.text;
-    btn.onclick = () => selectOption(i, opt.score, btn);
+    btn.onclick = () => toggleOption(i, btn);
     container.appendChild(btn);
   });
+  document.getElementById('next-btn-wrap').style.display = 'none';
 }
 
-function selectOption(idx, score, btn) {
-  document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
-  btn.classList.add('selected');
-  answers.push(score);
-  answerIndexes.push(idx);
-  totalScore += score;
-  setTimeout(() => {
-    currentQ++;
-    if (currentQ < questions.length) { showQuestion(currentQ); } else { showLoading(); }
-  }, 400);
+function toggleOption(idx, btn) {
+  const pos = selectedIndexes.indexOf(idx);
+  if (pos === -1) {
+    selectedIndexes.push(idx);
+    btn.classList.add('selected');
+  } else {
+    selectedIndexes.splice(pos, 1);
+    btn.classList.remove('selected');
+  }
+  document.getElementById('next-btn-wrap').style.display = selectedIndexes.length > 0 ? 'block' : 'none';
+}
+
+function nextQuestion() {
+  const q = questions[currentQ];
+  // Average score of selected options
+  const avgScore = selectedIndexes.reduce((sum, i) => sum + q.options[i].score, 0) / selectedIndexes.length;
+  totalScore += avgScore;
+  answers.push(Math.round(avgScore));
+  answerIndexes.push(selectedIndexes[0]); // store first for summary
+  currentQ++;
+  if (currentQ < questions.length) { showQuestion(currentQ); } else { showLoading(); }
 }
 
 const loadingMessages = ["Анализирую твои ответы...", "Тед одобрил. Том думает...", "Считаю процент совместимости...", "Том тоже одобрил 🐾"];
@@ -475,7 +495,7 @@ function sendResults() {
   });
 }
 
-function restartQuiz() { currentQ = 0; totalScore = 0; answers = []; answerIndexes = []; showScreen('screen-welcome'); }
+function restartQuiz() { currentQ = 0; totalScore = 0; answers = []; answerIndexes = []; selectedIndexes = []; showScreen('screen-welcome'); }
 function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 </script>
 
