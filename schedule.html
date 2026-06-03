@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Расписание Лики 📅</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #F4A7B9;
+    --pink-deep: #D4607A;
+    --pink-light: #FDE8EE;
+    --cream: #FFF9F5;
+    --brown: #3D2314;
+    --muted: #8A6A72;
+    --green: #4CAF7D;
+    --green-light: #E8F5EE;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--cream); color: var(--brown); min-height: 100vh; }
+  body::before {
+    content: '💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅 💅';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    font-size: 28px; opacity: 0.04; pointer-events: none;
+    word-spacing: 20px; line-height: 3; z-index: 0; overflow: hidden;
+  }
+  .container { max-width: 520px; margin: 0 auto; padding: 2rem 1.5rem; position: relative; z-index: 1; }
+
+  .hero { text-align: center; padding: 2rem 0 1.5rem; }
+  .hero-badge {
+    display: inline-block; background: var(--pink-light); color: var(--pink-deep);
+    font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 6px 16px; border-radius: 20px; margin-bottom: 1.2rem;
+  }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; line-height: 1.3; margin-bottom: 0.6rem; }
+  .hero h1 em { color: var(--pink-deep); font-style: italic; }
+  .hero p { font-size: 0.95rem; color: var(--muted); line-height: 1.6; max-width: 380px; margin: 0 auto; }
+
+  .card {
+    background: white; border: 1.5px solid var(--pink-light); border-radius: 20px;
+    padding: 1.5rem; margin-bottom: 1rem;
+  }
+  .card-title {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--pink-deep); margin-bottom: 1rem;
+  }
+
+  /* DAYS */
+  .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .day-btn {
+    aspect-ratio: 1; border: 2px solid var(--pink-light); border-radius: 10px;
+    background: var(--cream); cursor: pointer; font-size: 11px; font-weight: 700;
+    color: var(--muted); transition: all 0.15s; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px; padding: 4px;
+  }
+  .day-btn:hover { border-color: var(--pink); background: var(--pink-light); }
+  .day-btn.selected { border-color: var(--pink-deep); background: var(--pink-light); color: var(--pink-deep); }
+  .day-btn .day-name { font-size: 10px; }
+  .day-btn .day-date { font-size: 13px; font-weight: 700; }
+
+  /* TIME */
+  .time-section { margin-top: 0.8rem; }
+  .time-label { font-size: 13px; color: var(--muted); margin-bottom: 0.6rem; font-weight: 600; }
+  .time-slots { display: flex; flex-wrap: wrap; gap: 8px; }
+  .time-btn {
+    border: 2px solid var(--pink-light); border-radius: 10px; background: var(--cream);
+    padding: 8px 14px; font-size: 13px; font-weight: 700; color: var(--muted);
+    cursor: pointer; transition: all 0.15s; font-family: 'Nunito', sans-serif;
+  }
+  .time-btn:hover { border-color: var(--pink); background: var(--pink-light); }
+  .time-btn.selected { border-color: var(--pink-deep); background: var(--pink-light); color: var(--pink-deep); }
+
+  /* CUSTOM TIME */
+  .custom-time-wrap { margin-top: 0.8rem; display: flex; align-items: center; gap: 10px; }
+  .custom-time-wrap label { font-size: 13px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .time-input {
+    border: 2px solid var(--pink-light); border-radius: 10px; padding: 8px 12px;
+    font-size: 14px; font-family: 'Nunito', sans-serif; font-weight: 700;
+    color: var(--brown); background: var(--cream); outline: none; width: 120px;
+  }
+  .time-input:focus { border-color: var(--pink-deep); }
+
+  /* COMMENT */
+  .comment-input {
+    width: 100%; border: 2px solid var(--pink-light); border-radius: 12px;
+    padding: 12px 14px; font-size: 14px; font-family: 'Nunito', sans-serif;
+    color: var(--brown); background: var(--cream); outline: none; resize: none;
+    line-height: 1.5;
+  }
+  .comment-input:focus { border-color: var(--pink-deep); }
+  .comment-input::placeholder { color: var(--pink); }
+
+  /* SUBMIT */
+  .submit-wrap { text-align: center; margin-top: 1.5rem; }
+  .btn {
+    display: inline-block; background: var(--pink-deep); color: white;
+    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700;
+    padding: 14px 40px; border-radius: 50px; border: none; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: #BF4D69; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212,96,122,0.3); }
+  .btn:disabled { background: var(--pink); transform: none; box-shadow: none; cursor: default; }
+
+  .status { font-size: 0.85rem; color: var(--muted); margin-top: 0.8rem; text-align: center; }
+
+  /* SUCCESS */
+  .success-screen { display: none; text-align: center; padding: 3rem 0; }
+  .success-screen.show { display: block; animation: fadeIn 0.5s ease; }
+  .success-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .success-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .success-sub { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 400px) { .hero h1 { font-size: 1.8rem; } .days-grid { gap: 4px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div id="main-screen">
+    <div class="hero">
+      <div class="hero-badge">📅 важное исследование</div>
+      <h1>Когда <em>Лика</em><br>свободна? 🐾</h1>
+      <p>Выбери день и время до которого занята — Димас получит уведомление и сразу придумает куда тебя утащить 🍫</p>
+    </div>
+
+    <!-- DAYS -->
+    <div class="card">
+      <div class="card-title">📆 выбери день</div>
+      <div class="days-grid" id="days-grid"></div>
+    </div>
+
+    <!-- TIME -->
+    <div class="card" id="time-card" style="display:none;">
+      <div class="card-title">⏰ занята до которого часа?</div>
+      <div class="time-label">Быстрый выбор:</div>
+      <div class="time-slots">
+        <button class="time-btn" onclick="selectTime('12:00', this)">12:00</button>
+        <button class="time-btn" onclick="selectTime('14:00', this)">14:00</button>
+        <button class="time-btn" onclick="selectTime('16:00', this)">16:00</button>
+        <button class="time-btn" onclick="selectTime('18:00', this)">18:00</button>
+        <button class="time-btn" onclick="selectTime('19:00', this)">19:00</button>
+        <button class="time-btn" onclick="selectTime('20:00', this)">20:00</button>
+        <button class="time-btn" onclick="selectTime('21:00', this)">21:00</button>
+        <button class="time-btn" onclick="selectTime('22:00', this)">22:00</button>
+      </div>
+      <div class="custom-time-wrap">
+        <label>или введи:</label>
+        <input type="time" class="time-input" id="custom-time" onchange="selectCustomTime(this.value)">
+      </div>
+    </div>
+
+    <!-- PICKUP -->
+    <div class="card" id="pickup-card" style="display:none;">
+      <div class="card-title">📍 откуда тебя забрать?</div>
+      <div class="time-slots" style="flex-direction: column; gap: 8px;">
+        <button class="time-btn" style="text-align:left;" onclick="selectPickup('С работы 💼', this)">💼 С работы</button>
+        <button class="time-btn" style="text-align:left;" onclick="selectPickup('Из дома 🏠', this)">🏠 Из дома</button>
+        <button class="time-btn" style="text-align:left;" onclick="selectPickup('Встретимся где-нибудь 📍', this)">📍 Встретимся где-нибудь</button>
+        <button class="time-btn" style="text-align:left;" onclick="selectPickup('Сам(а) доберусь 🚶', this)">🚶 Сам(а) доберусь</button>
+      </div>
+      <div class="custom-time-wrap" style="margin-top: 0.8rem;">
+        <label>или укажи адрес:</label>
+        <input type="text" class="time-input" id="custom-pickup" style="width:100%; flex:1;"
+          placeholder="ул. Ленина, 5..." oninput="selectCustomPickup(this.value)">
+      </div>
+    </div>
+
+    <!-- COMMENT -->
+    <div class="card" id="comment-card" style="display:none;">
+      <div class="card-title">💬 хочешь добавить что-нибудь?</div>
+      <textarea class="comment-input" id="comment" rows="3"
+        placeholder="Например: устала как собака, хочу киндер буэно 🍫"></textarea>
+    </div>
+
+    <div class="submit-wrap">
+      <button class="btn" id="send-btn" onclick="sendSchedule()">📬 Отправить Димасу</button>
+      <p class="status" id="status-text"></p>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">🎉</div>
+    <h2 class="success-title">Димас уже знает!</h2>
+    <p class="success-sub">
+      Он получил уведомление и скоро напишет.<br>
+      Тед и Том одобряют это решение 🐾<br><br>
+      <em style="color:var(--pink-deep);">А киндер буэно уже в пути 🍫</em>
+    </p>
+  </div>
+
+</div>
+
+<script>
+const TELEGRAM_TOKEN = '7691584090:AAGmMwZPktYq0BkE4-t-c28zYMVVwramDJA';
+const CHAT_ID = '157024778';
+
+let selectedDay = null;
+let selectedTime = null;
+let selectedPickup = null;
+
+// Build next 14 days
+function buildDays() {
+  const grid = document.getElementById('days-grid');
+  grid.innerHTML = '';
+  const dayNames = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const today = new Date();
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const btn = document.createElement('button');
+    btn.className = 'day-btn';
+    btn.innerHTML = `<span class="day-name">${dayNames[d.getDay()]}</span><span class="day-date">${d.getDate()}</span>`;
+    btn.onclick = () => selectDay(d, btn);
+    grid.appendChild(btn);
+  }
+}
+
+function selectDay(date, btn) {
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedDay = date;
+  document.getElementById('time-card').style.display = 'block';
+  document.getElementById('pickup-card').style.display = 'block';
+  document.getElementById('comment-card').style.display = 'block';
+  document.getElementById('time-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function selectPickup(value, btn) {
+  document.querySelectorAll('#pickup-card .time-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedPickup = value;
+  document.getElementById('custom-pickup').value = '';
+}
+
+function selectCustomPickup(val) {
+  if (val) {
+    document.querySelectorAll('#pickup-card .time-btn').forEach(b => b.classList.remove('selected'));
+    selectedPickup = val;
+  }
+}
+
+function selectTime(time, btn) {
+  document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedTime = time;
+  document.getElementById('custom-time').value = '';
+}
+
+function selectCustomTime(val) {
+  if (val) {
+    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+    selectedTime = val;
+  }
+}
+
+function sendSchedule() {
+  if (!selectedDay) { showStatus('Выбери день 📆'); return; }
+  if (!selectedTime) { showStatus('Выбери время ⏰'); return; }
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Отправляю...';
+
+  const dayNames = ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'];
+  const dayFull = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+  const comment = document.getElementById('comment').value.trim();
+
+  const dateStr = `${dayFull[selectedDay.getDay()]}, ${selectedDay.getDate()}.${String(selectedDay.getMonth()+1).padStart(2,'0')}`;
+
+  let msg = `💅 *Лика обновила расписание!*\n\n`;
+  msg += `📆 *День:* ${dateStr}\n`;
+  msg += `⏰ *Занята до:* ${selectedTime}\n`;
+  if (selectedPickup) msg += `📍 *Откуда забрать:* ${selectedPickup}\n`;
+  if (comment) msg += `💬 *Комментарий:* ${comment}\n`;
+  msg += `\n_Самое время придумать куда её утащить 🍫_`;
+
+  fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: CHAT_ID,
+      text: msg,
+      parse_mode: 'Markdown'
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      document.getElementById('main-screen').style.display = 'none';
+      document.getElementById('success-screen').classList.add('show');
+    } else {
+      throw new Error(data.description || 'error');
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.textContent = '📬 Отправить Димасу';
+    showStatus('Что-то пошло не так, попробуй ещё раз 😔');
+    console.error(err);
+  });
+}
+
+function showStatus(text) {
+  document.getElementById('status-text').textContent = text;
+}
+
+buildDays();
+</script>
+</body>
+</html>
